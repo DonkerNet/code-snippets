@@ -1,0 +1,19 @@
+DECLARE @TableSchema NVARCHAR(MAX)
+DECLARE @TableName NVARCHAR(MAX)
+
+SET @TableSchema = 'dbo'
+SET @TableName = 'SomeTable'
+
+SELECT SUBSTRING(DT.Columns, 2, LEN(DT.Columns))
+FROM
+(
+	SELECT CAST
+	(
+		(
+			SELECT ',' + COLUMN_NAME
+			FROM INFORMATION_SCHEMA.COLUMNS
+			WHERE TABLE_NAME = @TableName AND TABLE_SCHEMA = @TableSchema
+			FOR XML PATH(''), TYPE
+		) AS NVARCHAR(MAX)
+	) Columns
+) DT
