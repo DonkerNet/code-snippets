@@ -1,13 +1,14 @@
 /* 
- * Fix for .NET versions below 4.5.
- * Fixes removal of the . at the end of a URL, when parsing a string into a URI using the UriBuilder (also the Uri class).
+ * The UriParser class treats all URI's as file paths by default, which causes trailing dots to be removed when parsing a string into a URI.
+ * This is a known bug present in .NET versions below 4.5 and the following code provides a workaround to this problem for the HTTP and HTTPS scheme.
  * See: https://stackoverflow.com/questions/856885/httpwebrequest-to-url-with-dot-at-the-end
  */
 
-private static void ClearUriCanonicalizeAsFilePathAttribute()
+private static void ClearHttpUriCanonicalizeAsFilePathAttribute()
 {
-    MethodInfo getSyntax = typeof(UriParser).GetMethod("GetSyntax", BindingFlags.Static | BindingFlags.NonPublic);
-    FieldInfo flagsField = typeof(UriParser).GetField("m_Flags", BindingFlags.Instance | BindingFlags.NonPublic);
+    Type uriParserType = typeof(UriParser);
+    MethodInfo getSyntax = uriParserType.GetMethod("GetSyntax", BindingFlags.Static | BindingFlags.NonPublic);
+    FieldInfo flagsField = uriParserType.GetField("m_Flags", BindingFlags.Instance | BindingFlags.NonPublic);
     if (getSyntax != null && flagsField != null)
     {
         foreach (string scheme in new[] { "http", "https" })
